@@ -312,11 +312,15 @@ impl ExprEvaluator {
     pub fn vars_and_values_as_string(&self) -> String {
         let mut ret = String::new();
         for (var_name, var_handle) in self.var_table.iter() {
-            let value = self.var_map.get(var_handle).unwrap();
-            ret.push_str(&format!("{} = {}\n", &var_name, value));
+            // Note: The tokenize inserts variables into the var table, regardless
+            //       of whether or not they are being defined. So if the variable
+            //       happens to be unbound, it will still be in the var table,
+            //       but will not exist in the var_map with a value. So check for it.
+            if let Some(value) = self.var_map.get(var_handle) {
+                ret.push_str(&format!("{} = {}\n", &var_name, value));
+            }
         }
         ret
-
     }
 
     fn pop_from_value_stack(&mut self, n: usize) -> bool {
